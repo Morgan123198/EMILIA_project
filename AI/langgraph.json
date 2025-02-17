@@ -1,0 +1,7 @@
+{
+    "dependencies": ["./emilia_agent"],
+    "graphs": {
+      "agent": "./src/core/emilia_agent.py:graph"
+    },
+    "env": ".env"
+  }

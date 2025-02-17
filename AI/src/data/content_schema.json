@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EmiliaContentDatabase",
+  "type": "object",
+  "properties": {
+    "content_categories": {
+      "type": "object",
+      "properties": {
+        "mindfulness": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_item"
+          }
+        },
+        "organization": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_item"
+          }
+        },
+        "motivation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_item"
+          }
+        },
+        "anxiety_management": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_item"
+          }
+        },
+        "crisis_resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/content_item"
+          }
+        }
+      },
+      "required": ["mindfulness", "organization", "motivation", "anxiety_management", "crisis_resources"]
+    }
+  },
+  "definitions": {
+    "content_item": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the content"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the content"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["video", "exercise", "technique", "article"],
+          "description": "Type of content"
+        },
+        "platform": {
+          "type": "string",
+          "enum": ["youtube", "instagram", "internal"],
+          "description": "Platform where the content is hosted"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the content (if applicable)"
+        },
+        "duration": {
+          "type": "string",
+          "description": "Duration in format 'MM:SS' (if applicable)"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Content creator or source"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Brief summary of the content"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Keywords for content matching"
+        },
+        "emotional_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["stress", "anxiety", "depression", "motivation", "focus", "calm", "crisis"]
+          },
+          "description": "Emotional states this content is suitable for"
+        },
+        "difficulty_level": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"],
+          "description": "Difficulty level of the content"
+        },
+        "recommended_context": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["academic", "personal", "crisis", "general"]
+          },
+          "description": "Contexts where this content is most relevant"
+        }
+      },
+      "required": ["id", "title", "type", "summary", "keywords", "emotional_tags"]
+    }
+  }
+}
