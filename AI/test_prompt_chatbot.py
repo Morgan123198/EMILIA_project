@@ -1,9 +1,12 @@
 from openai import OpenAI
 import time
+from src.core.config import get_settings
+
+settings = get_settings()
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key="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",
+    api_key=settings.OPENROUTER_API_KEY,
 )
 
 prompt = """

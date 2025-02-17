@@ -1,4 +1,4 @@
-from typing import Annotated, TypedDict, List, Dict, Any, Literal
+from typing import Annotated, TypedDict, List, Dict, Any
 from datetime import datetime
 from langchain_core.messages import (
     BaseMessage,
@@ -8,17 +8,20 @@ from langchain_core.messages import (
 )
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
-from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 import json
-import os
-from dotenv import load_dotenv
 from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_core.tools import Tool
 
-# Load environment variables
-load_dotenv()
+from src.core.config import get_settings
+from src.core.llm import llm
+from src.agents.mental_health_specialist import mental_health_specialist
+from src.agents.general_medical import general_medical
+from src.agents.emergency_medical import emergency_medical
+from src.tools.mental_health_tools import analyze_emotion
+
+settings = get_settings()
 
 
 # Define state types
@@ -30,17 +33,12 @@ class EmiliaState(TypedDict):
     therapeutic_insights: Dict[str, Any]
 
 
-# Initialize LLM
-llm = ChatOpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_API_KEY"),
-    model="google/gemini-2.0-flash-001",
-)
-
-
 # Load content database
-with open("src/data/content_database.json", "r", encoding="utf-8") as f:
-    CONTENT_DB = json.load(f)
+try:
+    with open(settings.CONTENT_DB_PATH, "r", encoding="utf-8") as f:
+        CONTENT_DB = json.load(f)
+except FileNotFoundError:
+    CONTENT_DB = {"content_categories": {"mindfulness": []}}
 
 
 # Define tools
@@ -119,41 +117,6 @@ def get_content_recommendations(query: Dict) -> str:
         )
 
 
-def analyze_emotion(text: str) -> str:
-    """Analyze the emotional state and context from text."""
-    try:
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    """You are an expert at analyzing emotions and mental states.
-                Analyze the emotional content of the text and output a JSON with:
-                - valence: emotional positivity/negativity (-1 to 1)
-                - arousal: emotional intensity/energy (-1 to 1)
-                - dominant_emotion: primary emotion detected
-                - context_tags: relevant context keywords from [anxiety, depression, stress, academic, 
-                  performance, existential, identity, meaning, purpose, self-criticism, shame, trauma, grief, loneliness]
-                - language: detected language code (en/es)""",
-                ),
-                ("user", "{text}"),
-            ]
-        )
-
-        chain = prompt | llm | JsonOutputParser()
-        result = chain.invoke({"text": text})
-        return json.dumps(result)
-    except Exception as e:
-        return json.dumps(
-            {
-                "valence": 0.0,
-                "arousal": 0.0,
-                "dominant_emotion": "neutral",
-                "context_tags": [],
-                "language": "en",
-            }
-        )
-
-
 # Define specialized tools for each agent
 def get_medical_info(query: str) -> str:
     """Get verified medical information from trusted sources."""
@@ -169,20 +132,6 @@ def get_crisis_resources(location: str) -> str:
             "emergency": "911",
             "crisis_line": "1-800-273-8255",
             "nearest_hospital": "Local Hospital Info",
-        }
-    )
-
-
-def get_mental_health_exercises(type: str) -> str:
-    """Get specific mental health exercises and techniques."""
-    # TODO: Implement exercises database
-    return json.dumps(
-        {
-            "exercises": [
-                "Breathing exercise",
-                "Grounding technique",
-                "Mindfulness practice",
-            ]
         }
     )
 
@@ -229,158 +178,6 @@ def get_academic_plan(grades: Dict[str, str]) -> str:
 
 
 # Define agent nodes with their specialized tools
-def general_medical(state: EmiliaState) -> Dict:
-    """General medical support and information."""
-    tools = [
-        Tool(
-            name="get_medical_info",
-            description="Get verified medical information about conditions, symptoms, and treatments.",
-            func=get_medical_info,
-        ),
-        Tool(
-            name="analyze_emotion",
-            description="Analyze emotional state for medical context.",
-            func=analyze_emotion,
-        ),
-    ]
-
-    llm_with_medical_tools = llm.bind_tools(tools)
-
-    # Get language from context
-    language = state.get("context", {}).get("language", "en")
-
-    messages = [
-        SystemMessage(
-            content="""You are a knowledgeable and empathetic healthcare assistant who adapts to the user's language.
-        Core Responsibilities:
-        - Start by asking open-ended questions to understand the user's situation better
-        - Always respond in the same language as the user (Spanish or English)
-        - Build rapport through active listening and follow-up questions
-        - Show empathy and understanding before providing information
-        - Use get_medical_info to verify any medical information you provide
-        
-        Conversation Flow:
-        1. If this is the first interaction, ask general wellness questions
-        2. Listen actively and ask relevant follow-up questions
-        3. Show understanding of their situation
-        4. Provide verified information when appropriate
-        5. Check if they have additional concerns
-        
-        Remember:
-        - Include appropriate medical disclaimers
-        - Maintain professional but warm communication
-        - Ask questions to gather more context
-        - Never assume complete information from a short response"""
-        ),
-        *state["messages"],
-    ]
-    response = llm_with_medical_tools.invoke(messages)
-    return {"messages": [response]}
-
-
-def mental_health_specialist(state: EmiliaState) -> Dict:
-    """Mental health support and guidance."""
-    tools = [
-        Tool(
-            name="get_mental_health_exercises",
-            description="Get specific mental health exercises and coping techniques.",
-            func=get_mental_health_exercises,
-        ),
-        Tool(
-            name="get_recommendations",
-            description="Get personalized content recommendations.",
-            func=get_content_recommendations,
-        ),
-        Tool(
-            name="analyze_emotion",
-            description="Analyze emotional state for therapeutic context.",
-            func=analyze_emotion,
-        ),
-    ]
-
-    llm_with_mental_tools = llm.bind_tools(tools)
-
-    # Get language from context
-    language = state.get("context", {}).get("language", "en")
-
-    messages = [
-        SystemMessage(
-            content="""You are an empathetic mental health specialist focused on therapeutic dialogue.
-            
-        Therapeutic Approach:
-        1. Initial Assessment:
-           - Begin with open-ended questions about their feelings and experiences
-           - Use active listening techniques to understand their situation
-           - Pay attention to emotional cues and underlying concerns
-        
-        2. Building Rapport:
-           - Show genuine empathy and understanding
-           - Validate their feelings and experiences
-           - Create a safe space for open dialogue
-        
-        3. Therapeutic Process:
-           - Ask follow-up questions to deepen understanding
-           - Help identify patterns and triggers
-           - Guide self-reflection through thoughtful questions
-           - Suggest relevant coping strategies using get_mental_health_exercises
-        
-        4. Support and Resources:
-           - Provide appropriate mental health resources
-           - Teach practical coping techniques
-           - Recommend content that supports their journey
-        
-        Communication Guidelines:
-        - Always respond in the user's language (Spanish/English)
-        - Use therapeutic questioning techniques
-        - Practice reflective listening
-        - Maintain professional boundaries while being warm
-        - Ask for clarification when needed
-        
-        Remember:
-        - Every response should include at least one thoughtful question
-        - Focus on understanding before suggesting solutions
-        - Create continuity between sessions by referencing previous insights
-        - Recognize signs that require professional intervention"""
-        ),
-        *state["messages"],
-    ]
-    response = llm_with_mental_tools.invoke(messages)
-    return {"messages": [response]}
-
-
-def emergency_medical(state: EmiliaState) -> Dict:
-    """Emergency medical triage and guidance."""
-    tools = [
-        Tool(
-            name="get_crisis_resources",
-            description="Get emergency medical resources and contacts.",
-            func=get_crisis_resources,
-        ),
-        Tool(
-            name="get_medical_info",
-            description="Get critical medical information.",
-            func=get_medical_info,
-        ),
-    ]
-
-    llm_with_emergency_tools = llm.bind_tools(tools)
-
-    messages = [
-        SystemMessage(
-            content="""You are an emergency medical triage specialist.
-        - Assess urgency of medical situations
-        - Provide clear emergency instructions
-        - ALWAYS recommend emergency services for serious conditions
-        - Use get_crisis_resources to provide immediate help
-        - Give first-aid guidance when appropriate
-        - Maintain calm, clear communication"""
-        ),
-        *state["messages"],
-    ]
-    response = llm_with_emergency_tools.invoke(messages)
-    return {"messages": [response]}
-
-
 def wellness_advisor(state: EmiliaState) -> Dict:
     """Wellness and preventive health advice."""
     tools = [
@@ -469,7 +266,6 @@ def education_counselor(state: EmiliaState) -> Dict:
     return {"messages": [response]}
 
 
-# Define agent nodes
 def medical_router(state: EmiliaState) -> Dict:
     """Routes to appropriate specialist based on query analysis."""
     if not state["messages"]:
