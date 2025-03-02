@@ -1,5 +1,5 @@
 {
-    "dependencies": ["./emilia_agent"],
+    "dependencies": ["./src/"],
     "graphs": {
       "agent": "./src/core/emilia_agent.py:graph"
     },

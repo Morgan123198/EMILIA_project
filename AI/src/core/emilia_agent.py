@@ -1,17 +1,12 @@
+import json
 from typing import Annotated, TypedDict, List, Dict, Any
-from datetime import datetime
 from langchain_core.messages import (
     BaseMessage,
     HumanMessage,
-    AIMessage,
     SystemMessage,
 )
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
-import json
-from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_core.tools import Tool
 
 from src.core.config import get_settings
@@ -110,7 +105,7 @@ def get_content_recommendations(query: Dict) -> str:
         ]
 
         return json.dumps({"recommendations": formatted_recs})
-    except Exception as e:
+    except Exception:
         # Fallback to a basic mindfulness exercise
         return json.dumps(
             {"recommendations": [CONTENT_DB["content_categories"]["mindfulness"][0]]}
