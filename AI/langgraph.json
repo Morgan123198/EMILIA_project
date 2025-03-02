@@ -1,7 +1,8 @@
 {
     "dependencies": ["./src/"],
     "graphs": {
-      "agent": "./src/core/emilia_agent.py:graph"
+      "agent": "./src/core/emilia_agent.py:graph",
+      "cbt_bot": "./src/core/cbt_bot.py:compiled_graph"
     },
     "env": ".env"
   }
