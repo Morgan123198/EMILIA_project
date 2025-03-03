@@ -1,23 +1,9 @@
-/* 📌 Estilos para el Dashboard */
 .dashboard-container {
-    background: white; /* ✅ Asegura el fondo blanco */
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .dashboard-container h1 {
-    color: #333;
-    font-size: 2rem;
-    margin-bottom: 10px;
-  }
-  
-  .dashboard-container p {
-    color: gray;
-    font-size: 1rem;
-  }
-  
+  padding: 2rem;
+}
+
+.dashboard-container h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}

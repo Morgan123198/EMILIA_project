@@ -1,13 +1,10 @@
 import React from "react";
 import "./Dashboard.css";
 
-const Dashboard = () => {
+export default function Dashboard() {
   return (
-    <div>
-      <h1>Bienvenido al Dashboard</h1>
-      <p>Aquí puedes gestionar tu cuenta.</p>
+    <div className="dashboard-container">
+      <h1>Dashboard de Emociones</h1>
     </div>
   );
-};
-
-export default Dashboard;
+}
