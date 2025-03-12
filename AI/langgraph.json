@@ -2,7 +2,7 @@
     "dependencies": ["./src/"],
     "graphs": {
       "agent": "./src/core/emilia_agent.py:graph",
-      "cbt_bot": "./src/core/cbt_bot.py:compiled_graph"
+      "cbt_bot": "./src/core/cbt_graph.py:create_cbt_graph"
     },
     "env": ".env"
   }

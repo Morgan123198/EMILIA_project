@@ -1,3 +1,4 @@
+# Deprecated
 from typing import Dict, List
 import json
 from langchain_core.tools import Tool

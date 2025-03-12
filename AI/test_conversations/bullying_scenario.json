@@ -1,0 +1,54 @@
+[
+  {
+    "role": "human",
+    "content": "hola"
+  },
+  {
+    "role": "ai",
+    "content": "Hola. ¿Cómo te puedo ayudar hoy?"
+  },
+  {
+    "role": "human",
+    "content": "me siento mal, me hacen bulling en el cole"
+  },
+  {
+    "role": "ai",
+    "content": "Siento mucho escuchar eso. El bullying puede ser muy doloroso. ¿Te importaría contarme un poco más sobre lo que está pasando en el colegio? ¿Quiénes te están haciendo bullying y qué te están haciendo o diciendo?"
+  },
+  {
+    "role": "human",
+    "content": "me esconden la mochila todos los dias y no se que hacer quiero llorar"
+  },
+  {
+    "role": "ai",
+  "content": "Entiendo completamente cómo te sientes. Esconden tu mochila todos los días... eso suena muy frustrante y angustiante. Es natural que quieras llorar en una situación así. ¿Cómo te hace sentir que te escondan la mochila? ¿Te sientes avergonzado, enojado, impotente, o algo diferente?"
+  },
+  {
+    "role": "human",
+    "content": "no, me da miedo y no se como expresarme, cuando hago exploto y digo cosas feas, soy tonto"
+  },
+  {
+    "role": "ai",
+    "content": "Es totalmente comprensible que sientas miedo cuando te esconden la mochila. Es una situación en la que uno se siente vulnerable e inseguro. Y entiendo también que te cueste expresarte; a veces las emociones son muy intensas y difíciles de poner en palabras. Me dices que cuando intentas expresarte, \"explotas\" y dices cosas que lamentas. ¿Puedes contarme un poco más sobre esto? ¿En qué tipo de situaciones sientes que explotas? ¿Y qué tipo de cosas te dices a ti mismo cuando sientes que eres \"tonto\"?"
+  },
+  {
+    "role": "human",
+    "content": "no sé cómo decirlo y siento verguenza, no se que hacer"
+  },
+  {
+    "role": "ai",
+    "content": "Está bien, tómate tu tiempo. No tienes que decirlo si no te sientes cómodo. Es muy valiente de tu parte el solo estar hablando de esto. Es completamente normal sentir vergüenza cuando se está pasando por una situación difícil como esta. La vergüenza puede ser una emoción muy paralizante. ¿Qué crees que pasaría si pudieras expresar tus sentimientos sin sentir vergüenza o sin \"explotar\"? ¿Cómo te gustaría reaccionar en esas situaciones en las que te esconden la mochila?"
+  },
+  {
+    "role": "human",
+    "content": "ok me siento hostigado porque hay niños mayores que juegan conmigo y yo soy el mas chiquito del saon y los profes parece quie hacen como que no ven y eso me da rabia, mis papas estan todo el dia en el trabajo y cuando vienen a casa solo prenden la tele. quiero llorar"
+  },
+  {
+    "role": "ai",
+    "content": "Gracias por compartir todo esto conmigo. Escucho que te sientes hostigado por los niños mayores, y que te da rabia que los profesores no intervengan. También mencionas que tus padres están ocupados y no les prestan atención a tus sentimientos, lo cual te hace sentir aún más solo. Es comprensible que quieras llorar en una situación así; estás lidiando con muchas cosas difíciles al mismo tiempo. ¿Cómo crees que podrías cambiar esta situación? ¿Hay algo que te gustaría que tus profesores o tus padres hicieran diferente?"
+  },
+  {
+    "role": "human",
+    "content": "no, me ayudas?"
+  }
+]

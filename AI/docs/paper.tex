@@ -1,0 +1,427 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+\begin{document}
+
+\title{Emilia: Asistente Virtual basado en IA para mejorar el bienestar emocional}
+
+\author{\IEEEauthorblockN{S. Choque, L. Leon, A. Perales, J. Valverde, A. Pacheco}
+\IEEEauthorblockA{
+\textit{Universidad Nacional de Ingeniería} \\
+Lima, Perú \\
+sara.choque.q@uni.pe, lleonc@uni.pe, augusto.perales.g@uni.pe\\
+jvalverde@autonoma.edu.pe, apachecotaboada@gmail.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Este artículo presenta el desarrollo de Emilia, un asistente virtual basado en inteligencia artificial diseñado para mejorar el bienestar emocional de estudiantes universitarios. Emilia utiliza procesamiento de lenguaje natural avanzado para proporcionar apoyo emocional personalizado, ayudando a los estudiantes a manejar el estrés académico y promover su salud mental. El sistema integra técnicas de terapia cognitivo-conductual y ejercicios de mindfulness, ofreciendo una solución accesible y adaptativa para el acompañamiento emocional continuo.
+\end{abstract}
+
+\begin{IEEEkeywords}
+asistente virtual, inteligencia artificial, bienestar emocional, salud mental, estudiantes universitarios
+\end{IEEEkeywords}
+
+\section{Introducción}
+Según António Guterres, actual secretario general de la ONU, la ansiedad y la depresión cuestan a la economía mundial 1 billón de dólares al año, además de que algunos países solo cuentan con dos trabajadores especializados en salud mental por cada 100 habitantes, lo que muestra la escasez de personal especializado para combatir estas enfermedades en estos países \cite{b1}. La Encuesta Global Generación Z 2022 del McKinsey Health Institute (MHI), realizada por la colaboradora Oliver Wyman entre más de 42.000 encuestados de 26 países de todos los continentes, analizó las cuatro dimensiones de la salud, mental, física, social y espiritual, y mostró que los Z son 1,9 veces más propensos que otras generaciones a sufrir trastornos de salud mental: un 39\% de los encuestados declaró haber sufrido depresión en los últimos dos años y un 42\% haber sentido ansiedad \cite{b2}.
+
+El Pew Research Center especifica que la generación Z comprende a los nacidos en los años 1997 a 2012 mientras que para McCrindle Research indica que son los 1995 y 2009. Actualmente esta generación se encuentra en la etapa de adolescencia, juventud o adultez temprana, desarrollándose dentro de los colegios, institutos, universidades o en etapa laboral.
+
+\subsection{Problemática}
+La época universitaria/técnica va marcada por el paso de la adolescencia a la juventud y todos los cambios que conllevan:
+
+\begin{itemize}
+\item La presión para cumplir con múltiples tareas, preparar exámenes y enfrentar metodologías de enseñanza inadecuadas son causas significativas de estrés y ansiedad \cite{b3}
+\item El estilo de vida y hábitos no saludables factores como el consumo de sustancias, la falta de actividad física y patrones de sueño irregulares están asociados con un deterioro de la salud mental en los estudiantes \cite{b4}
+\item Los problemas sociales y económicos como la falta de apoyo social, las dificultades familiares y las tensiones económicas contribuyen significativamente al estrés y la ansiedad, afectando el rendimiento académico \cite{b5}
+\item El impacto de la Pandemia de COVID-19, el cambio hacia el aprendizaje remoto, el aislamiento social y la incertidumbre que resultaron en un aumento de los niveles de estrés y ansiedad \cite{b6}
+\item Finalmente, la falta de autodeterminación, muchos estudiantes sienten que no tienen control sobre su rendimiento académico, lo que incrementa la frustración, el cinismo y los síntomas de agotamiento emocional \cite{b7}
+\end{itemize}
+
+Actualmente, el tema de salud mental presenta limitaciones como es la insuficiencia de estudios e investigaciones adaptadas a las necesidades locales y el acceso a los servicios de salud mental tiene barreras económicas para los universitarios. Aunque algunas instituciones ofrecen programas de atención psicológica, estos suelen ser limitados en alcance y capacidad, dificultando la atención personalizada y a tiempo.
+
+\subsection{Objetivos}
+El presente artículo tiene como objetivo principal describir el desarrollo de un asistente virtual de apoyo emocional denominado Emilia, el cual cumple un rol de acompañante empático, diseñado específicamente para estudiantes universitarios. Emilia busca brindar acompañamiento en momentos de vulnerabilidad emocional a través de conversaciones personalizadas, ayudando a reconocer y manejar sus emociones, ofreciendo recomendaciones adaptadas a sus intereses y necesidades para promover su bienestar, especialmente en los desafíos emocionales asociados a la vida académica.
+
+\subsection{Estado del Arte}
+A lo largo de los años, los chatbots han pasado de sistemas rígidos basados en reglas estáticas, como ELIZA (el primer programa de procesamiento de lenguaje natural) a plataformas avanzadas que integran aprendizaje automático y procesamiento del lenguaje natural (NLP).
+Las innovaciones en modelos basados en Transformer, como Transformer-XL y Compressive Transformer, han mejorado la capacidad de procesar contextos largos y aprender dependencias complejas, ampliando su aplicabilidad en análisis secuenciales y datos extensos en tiempo real. 
+Con la llegada de modelos preentrenados como BERT, GPT, y más recientemente LLama 2 y ChatGPT, los chatbots evolucionaron hacia sistemas predictivos con capacidad de entender contexto, emociones y patrones de conversación. Por ejemplo, Meta AI y otras iniciativas han aprovechado la IA generativa para diseñar asistentes más humanos y adaptativos.
+
+\subsection{Evaluación Comparativa de Chatbots Terapéuticos Existentes}
+El desarrollo de chatbots terapéuticos basados en LLMs ha experimentado un crecimiento significativo en los últimos años. Para contextualizar la posición de Emilia dentro de este ecosistema, analizamos las características principales de las soluciones más destacadas:
+
+\begin{itemize}
+\item \textbf{Woebot}: Desarrollado originalmente en Stanford, Woebot implementa intervenciones diarias breves basadas en CBT siguiendo flujos de conversación estructurados. Sus interacciones se fundamentan en un sistema experto con base de conocimientos clínicos que garantiza adherencia a técnicas basadas en evidencia \cite{b18}. Un ensayo controlado aleatorizado con estudiantes universitarios demostró que Woebot redujo significativamente los síntomas de depresión en solo dos semanas \cite{b19}. Su enfoque altamente estructurado contrasta con el sistema de dos fases de Emilia, que permite una mayor flexibilidad conversacional en la fase de escucha empática.
+
+\item \textbf{Wysa}: Representado por un avatar de pingüino, Wysa permite conversaciones de texto libre utilizando NLP para interpretar la entrada del usuario y reconocimiento de intención para seleccionar respuestas apropiadas. Este enfoque más flexible ha sido validado en múltiples estudios, incluyendo uno con 500 usuarios para manejo de dolor crónico \cite{b20}. La evaluación de la alianza terapéutica con Wysa mostró puntuaciones comparables a la terapia presencial (3.7-4.0 en una escala de 5 puntos) \cite{b21}. Similar a Emilia, Wysa emplea un sistema híbrido que combina estructura de diálogo basada en reglas con aprendizaje automático.
+
+\item \textbf{Replika}: A diferencia de los anteriores, Replika no fue diseñado específicamente como entrenador CBT, sino como un "compañero IA" para soporte emocional general. Utiliza modelos de lenguaje avanzados para conversaciones abiertas sobre cualquier tema, ofreciendo compañía y un espacio sin juicios donde los usuarios pueden expresar sus sentimientos \cite{b22}. Aunque no implementa ejercicios CBT explícitamente, contribuye al bienestar mental al proporcionar apoyo social. Emilia se diferencia de Replika al estar específicamente orientada a técnicas terapéuticas estructuradas para estudiantes universitarios.
+
+\item \textbf{Youper}: Una aplicación de autoayuda guiada que utiliza IA para conversaciones breves de registro emocional, combinando CBT y mindfulness. En un estudio, los usuarios de Youper experimentaron reducciones de casi 50\% en síntomas de ansiedad y depresión \cite{b23}. Similar a Emilia, integra seguimiento del estado de ánimo, contenido psicoeducativo y diálogos de texto cortos para entrenar habilidades de afrontamiento.
+\end{itemize}
+
+Un análisis sistemático reciente identificó "mejoras importantes" en síntomas de salud mental a través de múltiples ensayos con chatbots terapéuticos, demostrando alta participación y satisfacción de los usuarios \cite{b23}. Estos resultados sugieren que los chatbots estructurados pueden entregar eficazmente psicoeducación, ejercicios cognitivos y práctica de habilidades.
+
+Emilia se posiciona dentro de este panorama como una solución que equilibra la estructura terapéutica con la flexibilidad conversacional a través de su arquitectura de dos fases, específicamente diseñada para abordar las necesidades contextuales de estudiantes universitarios hispanohablantes.
+
+Dentro del ámbito de salud mental se tiene a aplicaciones como Rootd \cite{b8} y Woebot \cite{b9} que proporcionaban herramientas como ejercicios de respiración, meditaciones guiadas y flujos preprogramados de terapia cognitivo-conductual (CBT, por sus siglas en inglés) y un botón de emergencia para ayudar a los usuarios a manejar la ansiedad y los ataques de pánico.
+Andrade-Arenas et al. \cite{b10} desarrollaron un chatbot basado en Dialogflow para brindar terapia y apoyo emocional a mayores de 18 años, mediante herramientas de terapia cognitivo-conductual y ejercicios de mindfulness. En el proceso se identificaron necesidades del usuario, diseño, implementación y pruebas, que involucraron a 15 usuarios que otorgaron una puntuación de satisfacción de 4,09 sobre 5, destacando el apoyo emocional proporcionado.
+
+Alonso et al. \cite{b11} realizaron un estudio preexperimental para evaluar un chatbot de apoyo emocional en 23 estudiantes en Trujillo entre 12 y 17 años con signos de ansiedad y depresión. Utilizaron escalas CES-D-R, NEPALESE-BAI para depresión y ansiedad. Fue desarrollado con tecnologías como Flutter, Python, FastApi, Dialogflow y AWS. Los resultados mostraron mejoras de 31.03\% en conocimientos sobre ansiedad, 20.36\% en depresión y 29.35\% en autorregulación emocional y el 41.3\% y 29.4\% en reducción de ansiedad y depresión, demostrando efectividad del chatbot en el apoyo emocional.
+
+Socios En Salud (SES) implementó una serie de chatbots en Perú para abordar las brechas en el acceso a servicios de salud durante la pandemia de COVID-19. Estos chatbots se enfocaron en diversas áreas, incluyendo la salud mental, salud materno infantil y manejo de enfermedades crónicas siendo los chatbots enfocados en la salud mental los más utilizados como "BienEstar", alcanzando más de 150,000 evaluaciones. Se hizo uso de cuestionarios de salud como PHQ-2 o PHQ-9 para la detección de depresión, y el cuestionario de autorreporte para la detección de ansiedad, donde se identificó que más del 50\% de las evaluaciones realizadas a través de las aplicaciones de salud mental, diabetes/hipertensión y nutrición/pérdida de peso resultaron positivas, es decir, indicaron la posible presencia de un problema de salud en los usuarios evaluados. (Socios En Salud, 2022).\cite{b12}
+
+Un análisis en ResearchGate destaca cómo los prompts, adaptados de evaluaciones clínicas, han permitido a los chatbots estructurar interacciones terapéuticas y monitorear síntomas psicológicos de manera efectiva \cite{b13}. Sin embargo, aunque existen numerosos modelos de lenguaje de gran escala (LLMs) con mayor sofisticación, su desempeño frente a una misma tarea o instrucción puede variar significativamente. Un estudio comparó la respuesta de ocho modelos de lenguaje causal de diferentes tamaños y concluyó que su especialización depende del diseño y entrenamiento, destacando la importancia de elegir el modelo adecuado según el contexto. \cite{b14}
+Es así que aún hay desafíos relacionados con costos computacionales y la optimización en la interacción humano-computadora que se adapte a contextos específicos. De esta manera surge Emilia un asistente virtual diseñado para atender las necesidades psicológicas de estudiantes universitarios cubriendo así una brecha crítica en el bienestar mental estudiantil.
+Emilia combina el procesamiento del lenguaje natural y el uso de técnicas de diagnóstico emocional tomando en cuenta herramientas de evaluación clínica y enfoques basados en terapia cognitivo-conductual como el Patient Health Questionnaire-9 (PHQ-9) y el Generalized Anxiety Disorder-7 (GAD-7), cuestionarios considerados como referencias en iniciativas previas de chatbots como Vickybot \cite{b15} y Otis \cite{b16} que brindan recomendaciones personalizadas y herramientas como ejercicios de mindfulness y videos guiados. 
+
+\section{Metodología}
+Para el desarrollo de este proyecto se adoptó metodologías como el Design Thinking y el Agile Scrum con el objetivo de comprender los principales problemas emocionales e identificar las necesidades de los estudiantes universitarios a través de la realización de encuestas de donde se extrajo insights claves para definir el alcance conversacional y funcional del sistema y el diseño del asistente en cuanto a la arquitectura técnica.
+
+Tras la encuesta realizada, estos son los resultados más representativos entre los universitarios:
+
+•	Los problemas que afectan su rendimiento académico y bienestar emocional, consisten en la dificultad para organizar su tiempo, el estrés por exámenes y proyectos, como también la ansiedad que presentan por la carga académica.
+
+•	Para afrontar los problemas emocionales que presentan, mencionaron que recurren a hablar con amigos, realizar ejercicios y practicar hobbies, buscando un alivio a través de estas actividades.
+
+•	Como motivación principal para el uso de una aplicación de gestión emocional señalaron las meditaciones guiadas, ejercicios para el manejo de ansiedad, recordatorios para el cuidado de la salud mental y un monitoreo de su estado emocional.
+
+•	Las características que más valoran en un aplicativo de apoyo emocional, consisten en un chat interactivo en tiempo real, acceso a frases motivadoras para fortalecer su estabilidad emocional y mejorar su rendimiento académico.
+
+
+Un resumen de la metodología se muestra en la figura 1.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{flujo_desarrollo_final.jpeg}
+\caption{Methodology for aplication development}
+\label{flujo_desarrollo_final}
+\end{figure}
+
+\subsection{Fases de Desarrollo}
+El desarrollo de Emilia siguió un proceso iterativo dividido en cuatro fases principales:
+
+\subsubsection{Fase 1: Establecimiento de Objetivos y Alcance}
+Para definir el alcance conversacional y funcional del sistema, se realizó un estudio preliminar mediante encuestas a estudiantes universitarios. Los objetivos principales establecidos fueron:
+
+\begin{itemize}
+\item \textbf{Capacidad Conversacional}:
+    \begin{itemize}
+    \item Proveer consejos personalizados basados en el contexto académico
+    \item Mantener conversaciones empáticas y adaptativas
+    \item Analizar y responder a estados emocionales
+    \end{itemize}
+\item \textbf{Gestión de Tareas}:
+    \begin{itemize}
+    \item Organización personalizada de actividades académicas
+    \item Seguimiento de objetivos y progreso
+    \end{itemize}
+\item \textbf{Situaciones Académicas}:
+    \begin{itemize}
+    \item Manejo de estrés durante exámenes
+    \item Gestión de carga académica
+    \item Equilibrio entre estudio y vida personal
+    \item Ansiedad por presentaciones
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Fase 2: Diseño de Interacción e Interfaz}
+Se optó por un enfoque mobile-first y web responsive considerando los hábitos de uso de los estudiantes:
+
+\begin{enumerate}
+\item \textbf{Plataforma}: Aplicación web progresiva (PWA) desarrollada con React para maximizar accesibilidad multiplataforma
+\item \textbf{Diseño UX/UI}:
+    \begin{itemize}
+    \item Prototipado detallado en Figma
+    \item Componentes reutilizables con Material-UI
+    \item Interfaces responsivas y adaptativas
+    \item Diseño centrado en la experiencia móvil
+    \end{itemize}
+\item \textbf{Secciones Principales}:
+    \begin{itemize}
+    \item Chat principal con el agente
+    \item Dashboard de seguimiento emocional
+    \item Organizador de tareas académicas
+    \item Recursos de bienestar y mindfulness
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Fase 3: Desarrollo e Implementación}
+La arquitectura técnica se implementó utilizando:
+
+\begin{itemize}
+\item \textbf{Frontend}: 
+    \begin{itemize}
+    \item React.js para la interfaz de usuario
+    \item Material-UI para componentes base
+    \item Redux para gestión de estado
+    \item PWA para funcionalidad offline
+    \end{itemize}
+\item \textbf{Backend}: Python FastAPI para servicios REST
+\item \textbf{Orquestación de Agentes}: LangGraph para gestión de flujos conversacionales
+\item \textbf{Base de Datos}: PostgreSQL para almacenamiento persistente
+\end{itemize}
+
+\subsubsection{Fase 4: Implementación del Sistema Conversacional}
+El flujo conversacional se diseñó para mantener coherencia y contexto:
+
+\begin{enumerate}
+\item \textbf{Procesamiento de Entrada}:
+    \begin{itemize}
+    \item Análisis de sentimientos en tiempo real
+    \item Detección de intención y contexto
+    \item Extracción de entidades relevantes
+    \end{itemize}
+\item \textbf{Generación de Respuestas}:
+    \begin{itemize}
+    \item Selección dinámica de estrategias terapéuticas
+    \item Personalización basada en historial
+    \item Adaptación al estado emocional actual
+    \end{itemize}
+\item \textbf{Integración API}:
+    \begin{itemize}
+    \item Conexión segura con LLM mediante API REST
+    \item Sistema de caché para optimizar respuestas
+    \item Manejo de errores y fallbacks
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Arquitectura del Sistema}
+La arquitectura de Emilia se divide en tres capas principales: Frontend, Backend y Sistema de Agentes.
+
+\subsubsection{Arquitectura General}
+El sistema se estructura de la siguiente manera:
+
+\begin{enumerate}
+\item \textbf{Capa Frontend (React)}:
+    \begin{itemize}
+    \item Componentes React reutilizables
+    \item Interfaz de chat principal con WebSocket
+    \item Gestor de tareas académicas
+    \item Dashboard de seguimiento emocional
+    \item Service Workers para funcionalidad offline
+    \end{itemize}
+
+\item \textbf{Capa Backend (FastAPI)}:
+    \begin{itemize}
+    \item API REST para comunicación
+    \item WebSocket para chat en tiempo real
+    \item Sistema de autenticación
+    \item Caché de respuestas para optimización
+    \item Base de datos PostgreSQL para persistencia
+    \end{itemize}
+\end{enumerate}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{system_architecture.png}
+\caption{Arquitectura general del sistema Emilia}
+\label{fig:system_architecture}
+\end{figure}
+
+\subsubsection{Sistema de Agentes}
+La capa de inteligencia artificial implementa una arquitectura de agentes especializados basada en LangGraph:
+
+\begin{enumerate}
+\item \textbf{Sistema de grafo conversacional}:
+    \begin{itemize}
+    \item Arquitectura de grafo de estado (StateGraph) para gestión de flujos
+    \item Transiciones condicionales entre agentes basadas en el estado emocional y fase conversacional
+    \item Sistema de memoria de corto y largo plazo para mantener contexto
+    \end{itemize}
+
+\item \textbf{Agentes especializados de dos fases}:
+    \begin{itemize}
+    \item \textit{Listener Agent}: Agente de escucha empática con capacidad para construir rapport y detectar necesidades de intervención
+    \item \textit{CBT Intervention Agent}: Especialista en técnicas cognitivo-conductuales para intervención terapéutica
+    \end{itemize}
+
+\item \textbf{Herramientas terapéuticas integradas}:
+    \begin{itemize}
+    \item Identificación de distorsiones cognitivas (All-or-Nothing Thinking, Overgeneralization, etc.) basadas en modelos clínicos validados \cite{b17}
+    \item Recomendación de técnicas CBT personalizadas:
+        \begin{itemize}
+        \item \textit{Thought Records}: Registros de pensamientos para identificar y desafiar pensamientos automáticos negativos \cite{b17}
+        \item \textit{Behavioral Activation}: Técnicas para incrementar la participación en actividades gratificantes y significativas \cite{b17}
+        \item \textit{Cognitive Restructuring}: Estrategias para modificar patrones de pensamiento negativos e irracionales \cite{b17}
+        \item \textit{Mindfulness}: Prácticas de atención plena para reducir rumia y promover aceptación \cite{b17}
+        \end{itemize}
+    \item Análisis de patrones de pensamiento y su relación con emociones y comportamientos (modelo ABC: Activating event, Belief, Consequence) \cite{b17}
+    \item Creación de tareas específicas (homework) para practicar fuera de la sesión, con hojas de trabajo estructuradas para el monitoreo de progresos \cite{b17}
+    \end{itemize}
+
+\item \textbf{Sistema de enrutamiento inteligente}:
+    \begin{itemize}
+    \item Función \textit{route\_based\_on\_phase} para determinar el flujo óptimo de la conversación
+    \item Cambio dinámico entre modos de escucha e intervención basado en análisis del estado emocional
+    \item Prevención de ciclos conversacionales mediante gestión del estado de entrada del usuario
+    \end{itemize}
+\end{enumerate}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{agent_architecture.png}
+\caption{Arquitectura del sistema de agentes de Emilia}
+\label{fig:agent_architecture}
+\end{figure}
+
+\subsubsection{Flujos de Comunicación}
+La comunicación entre capas sigue un patrón unidireccional:
+
+\begin{enumerate}
+\item Frontend realiza peticiones al Backend vía REST API
+\item Backend autentica y valida las peticiones
+\item Router Agent recibe las consultas procesadas
+\item Los agentes especializados procesan las solicitudes
+\item Las respuestas se cachean para optimizar futuras consultas similares
+\item La información persistente se almacena en PostgreSQL
+\end{enumerate}
+
+\subsection{Seguridad y Privacidad}
+Se implementan medidas de protección:
+\begin{itemize}
+\item Encriptación de extremo a extremo
+\item Anonimización de datos
+\item Protocolos de almacenamiento seguro
+\item Mecanismos de consentimiento informado
+\end{itemize}
+
+\section{Resultados}
+La evaluación preliminar de Emilia se realizó mediante pruebas iniciales con un grupo reducido de estudiantes universitarios y escenarios predefinidos. Esta fase inicial de evaluación nos permitió observar algunas tendencias prometedoras, aunque preliminares, sobre la efectividad del sistema.
+
+\subsection{Observaciones Iniciales}
+Durante las sesiones de prueba con estudiantes voluntarios, pudimos observar varios aspectos interesantes sobre la interacción con el sistema:
+
+\begin{itemize}
+\item Los usuarios tendieron a interactuar con el sistema de manera prolongada, mostrando engagement con las conversaciones
+\item La mayoría de los participantes reportaron sentirse cómodos compartiendo sus preocupaciones con el sistema
+\item Se observó una buena receptividad hacia las técnicas CBT presentadas, aunque su implementación efectiva requiere un seguimiento más extenso
+\item El diseño de la interfaz resultó intuitivo para la mayoría de los usuarios, facilitando la adopción del sistema
+\end{itemize}
+
+\subsection{Análisis de Caso: Manejo de Situaciones Emocionales}
+Para ilustrar el funcionamiento de Emilia, analizamos un caso representativo de una conversación en español sobre una situación de acoso escolar:
+
+\subsubsection{Caso: Situación de Bullying Escolar}
+En este escenario, un estudiante reportó una situación donde le escondían sus pertenencias en el colegio y expresaba sentimientos de miedo, vergüenza e impotencia. La conversación evolucionó de la siguiente manera:
+
+\begin{enumerate}
+\item \textbf{Fase de escucha empática}:
+    \begin{itemize}
+    \item El agente respondió con empatía: \textit{"Entiendo completamente cómo te sientes. Esconden tu mochila todos los días... eso suena muy frustrante y angustiante."}
+    \item Exploró las emociones subyacentes mediante preguntas abiertas: \textit{"¿Cómo te hace sentir que te escondan la mochila?"}
+    \item Validó sentimientos de vulnerabilidad: \textit{"Es totalmente comprensible que sientas miedo... Es una situación en la que uno se siente vulnerable e inseguro."}
+    \item Identificó patrones de autoinculpación cuando el usuario expresó: \textit{"soy tonto"}
+    \end{itemize}
+
+\item \textbf{Transición a intervención}:
+    \begin{itemize}
+    \item El agente detectó una solicitud directa de ayuda: \textit{"me ayudas?"}
+    \item Realizó una transición natural hacia el modo de intervención CBT
+    \end{itemize}
+\end{enumerate}
+
+En la fase de intervención CBT, observamos que el sistema pudo identificar distorsiones cognitivas clave como la auto-etiquetación negativa y la auto-culpabilización. Basándose en el análisis conversacional, el sistema propuso técnicas adecuadas como ejercicios de autocompasión y reestructuración cognitiva.
+
+En particular, el sistema implementó las siguientes técnicas basadas en CBT \cite{b17}:
+
+\begin{itemize}
+\item \textbf{Reestructuración cognitiva}: Identificación del pensamiento automático negativo "soy tonto" y guía para desafiarlo con evidencia más equilibrada.
+\item \textbf{Ejercicio de autocompasión}: Promoción de diálogo interno compasivo para contrarrestar la autocrítica, sugiriendo hablar consigo mismo como lo haría con un amigo en situación similar.
+\item \textbf{Modelo ABC}: Análisis de la situación (A: esconder la mochila), creencias (B: "soy tonto", "no puedo expresarme"), y consecuencias emocionales (C: miedo, vergüenza).
+\item \textbf{Comunicación asertiva gradual}: Sugerencia de pasos prácticos para expresar sus sentimientos de forma progresiva, comenzando con ejercicios escritos y avanzando hacia interacciones directas.
+\end{itemize}
+
+Estas técnicas se seleccionaron específicamente para abordar las distorsiones cognitivas identificadas y proporcionar herramientas prácticas adecuadas al contexto del usuario, siguiendo lineamientos establecidos de práctica en CBT \cite{b17}.
+
+\subsection{Limitaciones Actuales}
+Durante esta evaluación preliminar, también identificamos varias limitaciones importantes que requieren trabajo adicional:
+
+\begin{itemize}
+\item Capacidad limitada para detectar situaciones que requieren intervención profesional inmediata
+\item Variabilidad en la precisión del reconocimiento emocional, especialmente en expresiones culturalmente específicas
+\item Necesidad de mejorar el seguimiento a largo plazo y la evaluación de la eficacia de las técnicas recomendadas
+\item Limitaciones en el manejo de situaciones complejas que involucran múltiples factores estresantes
+\end{itemize}
+
+\section{Conclusiones}
+Los resultados preliminares de este estudio sugieren que Emilia, como asistente virtual basado en IA para el bienestar emocional, podría representar una herramienta complementaria para atender ciertas necesidades de apoyo emocional de los estudiantes universitarios. Las conclusiones iniciales del desarrollo e implementación de Emilia son:
+
+\begin{enumerate}
+\item \textbf{Potencial del modelo de dos fases}: La arquitectura dual que combina un agente de escucha empática con un especialista en intervención CBT muestra potencial para proporcionar un marco estructurado de apoyo emocional inicial, aunque se requiere una evaluación más rigurosa de su efectividad a largo plazo.
+
+\item \textbf{Accesibilidad como ventaja}: Una ventaja clara de Emilia es su accesibilidad continua, lo que podría ayudar a superar algunas barreras logísticas y de estigma asociadas con la búsqueda de apoyo para la salud mental.
+
+\item \textbf{Personalización prometedora}: La capacidad inicial del sistema para adaptar sus respuestas basadas en el análisis del lenguaje muestra promesa, aunque requiere refinamiento continuo basado en feedback de usuarios y expertos en salud mental.
+
+\item \textbf{Aplicación de técnicas CBT basadas en evidencia}: La implementación de técnicas terapéuticas específicas como la reestructuración cognitiva, el modelo ABC, y los ejercicios de autocompasión \cite{b17} demuestra el potencial de los sistemas de IA para ofrecer intervenciones fundamentadas en prácticas clínicas establecidas. 
+
+\item \textbf{Complemento, no sustituto}: Es fundamental enfatizar que Emilia debe considerarse únicamente como un complemento a los servicios profesionales de salud mental, nunca como un sustituto. Su valor potencial reside en proporcionar un primer punto de contacto y apoyo básico cuando otros recursos no están disponibles.
+
+\item \textbf{Oportunidades de mejora}: Identificamos numerosas áreas que requieren mejora significativa, particularmente en la detección de crisis, precisión de las intervenciones terapéuticas, y adaptación a contextos culturales específicos.
+\end{enumerate}
+
+\subsection{Trabajo Futuro}
+Las próximas etapas de desarrollo de Emilia incluyen:
+
+\begin{itemize}
+\item Elaboración de un estudio controlado con metodología rigurosa para evaluar la efectividad terapéutica
+\item Desarrollo de protocolos de detección y derivación para situaciones de crisis
+\item Mejora de los algoritmos de análisis emocional y contextual
+\item Colaboración con profesionales de salud mental para refinar las intervenciones terapéuticas
+\item Adaptación a contextos educativos específicos con desafíos particulares
+\end{itemize}
+
+Este trabajo representa un paso inicial en la exploración del potencial de las tecnologías de IA para complementar los servicios de apoyo emocional tradicionales en entornos educativos. Los resultados, aunque preliminares, sugieren que existe un camino prometedor para el desarrollo de herramientas digitales que puedan contribuir al bienestar emocional de los estudiantes universitarios cuando se diseñan e implementan con responsabilidad y en colaboración con expertos en salud mental.
+
+\begin{thebibliography}{00}
+\bibitem{b1} Naciones Unidas, ``El Secretario General también solicitó a los gobiernos que inviertan más en servicios de salud mental de calidad'', 2022.
+
+\bibitem{b2} Oliver Wyman, ``El bienestar emocional de la Generación Z se resiente: el 50\% reporta altos niveles de estrés'', 2023.
+
+\bibitem{b3} R. Cabanach, A. Fernández-Cervantes, and A. Valle, ``Estresores académicos percibidos por estudiantes universitarios y su relación con el burnout y el rendimiento académicos'', Anuario de Psicología, vol. 44, no. 1, pp. 15-23, 2014.
+
+\bibitem{b4} O. Jiménez Diez and R. Ojeda López, ``Estudiantes universitarios y el estilo de vida'', Revista Iberoamericana de Producción Académica y Gestión Educativa, vol. 4, no. 8, pp. 1-15, 2017.
+
+\bibitem{b5} J. Hernández, ``Factores asociados a síntomas de ansiedad en los estudiantes del programa de enfermería de la Universidad de Santander-Udes, Bucaramanga'', Universidad de Santander, 2018.
+
+\bibitem{b6} J. C. Méndez Mamani and R. A. Arévalo Marcos, ``Estrés y ansiedad en estudiantes universitarios de enfermería durante la enseñanza en la pandemia de COVID-19'', Ciencia Latina Revista Científica Multidisciplinar, vol. 6, no. 5, pp. 4166-4176, 2022.
+
+\bibitem{b7} M. Salanova, W. B. Schaufeli, I. M. Martínez, and E. Bresó, ``How obstacles and facilitators predict academic performance: The mediating role of study burnout and engagement'', Anxiety, Stress \& Coping, vol. 23, no. 1, pp. 53-70, 2010.
+
+\bibitem{b8} Rootd, ``Rootd'', 2023.
+
+\bibitem{b9} Woebot Health, ``Woebot: Tu Compañero Virtual para la Salud Mental'', 2023. [Online]. Available: https://woebothealth.com/
+
+\bibitem{b10} L. Andrade-Arenas, C. Yactayo-Arias, and F. Pucuhuayla-Revatta, ``Therapy and Emotional Support through a Chatbot'', International Journal of Online and Biomedical Engineering, vol. 20, no. 2, pp. 114-130, 2024.
+\bibitem{b11} A. Alonso, G. Gil, J. Rafael, S. Polo, P. Gilmer, and C. Dominguez, ``Chatbot in Emotional Support Against Anxiety and Depression for High School Students at an Educational Institution in Trujillo, 2023'', in Proc. LACCEI International Multi-Conference for Engineering, Education and Technology, Aug. 2023.
+\bibitem{b12}Socios En Salud. (2022). Using digital chatbots to close gaps in healthcare access during the COVID-19 pandemic. National Library of Medicine. https://pmc.ncbi.nlm.nih.gov/articles/PMC9716819/pdf/i2220-8372-12-4-180.pdf
+\bibitem{b13} R. M. Smith and J. D. Brown, ``Generative Transformer Chatbots for Mental Health Support: A Study on Depression and Anxiety'', ResearchGate, 2023.
+\bibitem{b14} N. Smilga, ``Prompting for response generation: which LLM to choose to build your own chatbot'', Deeppavlov, vol. 5, pp. 1-15, 2023.
+\bibitem{b15} A. García-HQolgado et al., ``Vickybot, a Chatbot for Anxiety-Depressive Symptoms and Work-Related Burnout: Development and Pilot Evaluation'', Journal of Medical Internet Research, vol. 25, no. 1, e41941, 2023.
+\bibitem{b16} C. Wilson et al., ``A Cognitive Behavior Therapy Chatbot (Otis) for Health Anxiety Management: A Mixed-Methods Pilot Study'', JMIR Mental Health, vol. 10, no. 3, e42158, 2023.
+\bibitem{b17} C. E. Ackerman, ``25 CBT Techniques and Worksheets for Cognitive Behavioral Therapy'', PositivePsychology.com, 2023. [Online]. Available: https://positivepsychology.com/cbt-cognitive-behavioral-therapy-techniques-worksheets/
+
+\bibitem{b18} Woebot Health, ``Why Generative AI Is Not Yet Ready for Mental Healthcare'', 2023. [Online]. Available: https://woebothealth.com/why-generative-ai-is-not-yet-ready-for-mental-healthcare/
+
+\bibitem{b19} K. K. Fitzpatrick et al., ``Delivering Cognitive Behavior Therapy to Young Adults With Symptoms of Depression and Anxiety Using a Fully Automated Conversational Agent (Woebot): A Randomized Controlled Trial'', JMIR Mental Health, vol. 4, no. 2, e19, 2017.
+
+\bibitem{b20} M. Gupta et al., ``Delivery of a Mental Health Intervention for Chronic Pain Through an Artificial Intelligence-Enabled App (Wysa): Protocol for a Prospective Pilot Study'', JMIR Research Protocols, vol. 11, no. 3, e36910, 2022.
+
+\bibitem{b21} C. Beatty et al., ``Evaluating the Therapeutic Alliance With a Free-Text CBT Conversational Agent (Wysa): A Mixed-Methods Study'', Frontiers in Digital Health, vol. 4, 847991, 2022.
+
+\bibitem{b22} V. Ta et al., ``User Experiences of Social Support From Companion Chatbots in Everyday Contexts: Thematic Analysis'', Journal of Medical Internet Research, vol. 22, no. 3, e16235, 2020.
+
+\bibitem{b23} M. Farzan et al., ``Artificial Intelligence-Powered Cognitive Behavioral Therapy Chatbots, a Systematic Review'', Iranian Journal of Psychiatry, vol. 20, no. 1, 2024.
+
+\end{thebibliography}
+
+\end{document}

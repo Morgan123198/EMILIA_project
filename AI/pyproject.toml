@@ -8,7 +8,7 @@ packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
-langgraph = "^0.2.38"
+langgraph = ">=0.0.25"
 langchain = "^0.3.3"
 langchain-openai = "^0.2.2"
 langchain-community = "^0.3.13"

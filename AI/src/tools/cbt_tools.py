@@ -1,413 +1,325 @@
+"""
+CBT Tools
+
+This module contains tools for cognitive behavioral therapy, implementing
+techniques from clinical CBT practices.
+"""
+
 import json
 from typing import Dict, List, Any
-from src.core.llm import llm
-from langchain_core.messages import SystemMessage, HumanMessage
-from src.core.config import get_settings
 
-settings = get_settings()
+from langchain_core.language_models import BaseChatModel
+from langchain_core.prompts import PromptTemplate
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.output_parsers import JsonOutputParser
 
-# Cognitive distortions from CBT literature
-COGNITIVE_DISTORTIONS = {
-    "all_or_nothing_thinking": {
-        "name": "All-or-Nothing Thinking",
-        "description": "Seeing things in black-and-white categories, with no middle ground.",
-        "examples": [
-            "If I don't get a perfect score, I'm a complete failure.",
-            "Either I do this perfectly or not at all.",
-        ],
-    },
-    "overgeneralization": {
-        "name": "Overgeneralization",
-        "description": "Taking a single negative event as a never-ending pattern of defeat.",
-        "examples": ["I always mess things up.", "Nothing ever works out for me."],
-    },
-    "mental_filter": {
-        "name": "Mental Filter",
-        "description": "Focusing exclusively on negative details while ignoring positive aspects.",
-        "examples": [
-            "They pointed out one mistake, so the whole project was terrible.",
-            "I only remember the times I failed, not my successes.",
-        ],
-    },
-    "disqualifying_the_positive": {
-        "name": "Disqualifying the Positive",
-        "description": "Rejecting positive experiences by insisting they don't count.",
-        "examples": [
-            "I only got the job because they needed someone quickly.",
-            "They're only complimenting me to be nice.",
-        ],
-    },
-    "jumping_to_conclusions": {
-        "name": "Jumping to Conclusions",
-        "description": "Making negative interpretations without supporting facts.",
-        "examples": [
-            "They didn't text back, so they must be angry with me.",
-            "I know they'll reject my idea before I even share it.",
-        ],
-    },
-    "magnification_or_minimization": {
-        "name": "Magnification/Minimization",
-        "description": "Exaggerating negatives or minimizing positives.",
-        "examples": [
-            "This mistake will ruin everything.",
-            "My accomplishments aren't really that important.",
-        ],
-    },
-    "emotional_reasoning": {
-        "name": "Emotional Reasoning",
-        "description": "Assuming feelings reflect fact (I feel it, therefore it must be true).",
-        "examples": [
-            "I feel incompetent, so I must be incompetent.",
-            "I feel guilty, so I must have done something wrong.",
-        ],
-    },
-    "should_statements": {
-        "name": "Should Statements",
-        "description": "Rigid rules about how you or others should behave.",
-        "examples": [
-            "I should always be productive.",
-            "People should always be considerate of my feelings.",
-        ],
-    },
-    "labeling": {
-        "name": "Labeling",
-        "description": "Attaching a negative label to yourself or others instead of describing behavior.",
-        "examples": ["I'm a failure.", "They're a terrible person."],
-    },
-    "personalization": {
-        "name": "Personalization",
-        "description": "Taking responsibility for events beyond your control.",
-        "examples": [
-            "It's my fault the group project failed.",
-            "If I had been a better friend, they wouldn't be depressed.",
-        ],
-    },
-}
-
-# CBT techniques and exercises
-CBT_TECHNIQUES = {
-    "thought_record": {
-        "name": "Thought Record",
-        "description": "A structured way to identify and challenge negative thoughts.",
-        "steps": [
-            "Identify the situation that triggered negative feelings",
-            "Note your emotions and their intensity (0-100%)",
-            "Record your automatic thoughts in that moment",
-            "Identify evidence that supports these thoughts",
-            "Identify evidence that contradicts these thoughts",
-            "Develop a balanced alternative thought",
-            "Rate how you feel after considering the balanced view",
-        ],
-        "applicable_distortions": [
-            "all_or_nothing_thinking",
-            "overgeneralization",
-            "mental_filter",
-            "jumping_to_conclusions",
-        ],
-    },
-    "behavioral_activation": {
-        "name": "Behavioral Activation",
-        "description": "Engaging in positive activities to improve mood and break cycles of inactivity.",
-        "steps": [
-            "Identify activities that typically bring you pleasure or a sense of accomplishment",
-            "Schedule these activities into your week, starting with small, achievable goals",
-            "Rate your mood before and after each activity",
-            "Gradually increase activity level as motivation improves",
-            "Notice and challenge thoughts that discourage activity",
-        ],
-        "applicable_distortions": [
-            "emotional_reasoning",
-            "magnification_or_minimization",
-        ],
-    },
-    "cognitive_restructuring": {
-        "name": "Cognitive Restructuring",
-        "description": "Identifying and challenging irrational thoughts to develop more balanced thinking.",
-        "steps": [
-            "Notice when you experience a strong negative emotion",
-            "Identify the thoughts behind this feeling",
-            "Question if these thoughts are realistic or helpful",
-            "Consider alternative interpretations",
-            "Practice more balanced thinking",
-        ],
-        "applicable_distortions": [
-            "all_or_nothing_thinking",
-            "jumping_to_conclusions",
-            "should_statements",
-            "labeling",
-        ],
-    },
-    "exposure_therapy": {
-        "name": "Exposure Therapy",
-        "description": "Gradually facing fears in a controlled way to reduce anxiety.",
-        "steps": [
-            "Create a hierarchy of feared situations, from least to most anxiety-provoking",
-            "Start with the least anxiety-provoking situation",
-            "Stay in the situation until anxiety reduces naturally",
-            "Practice relaxation techniques during exposure",
-            "Gradually move up the hierarchy as comfort increases",
-        ],
-        "applicable_distortions": ["catastrophizing", "emotional_reasoning"],
-    },
-    "mindfulness_practice": {
-        "name": "Mindfulness Practice",
-        "description": "Developing awareness of thoughts without judgment or attachment.",
-        "steps": [
-            "Set aside time for regular mindfulness practice",
-            "Focus attention on present-moment experience",
-            "Notice thoughts as they arise without judging them",
-            "Gently return attention to the present when mind wanders",
-            "Practice viewing thoughts as passing events, not facts",
-        ],
-        "applicable_distortions": [
-            "emotional_reasoning",
-            "magnification_or_minimization",
-            "mental_filter",
-        ],
-    },
-    "socratic_questioning": {
-        "name": "Socratic Questioning",
-        "description": "Using logical questioning to examine evidence for and against thoughts.",
-        "steps": [
-            "What evidence supports this thought?",
-            "What evidence contradicts it?",
-            "Are there alternative explanations?",
-            "What's the worst that could happen? How likely is it?",
-            "What would I tell a friend who had this thought?",
-        ],
-        "applicable_distortions": [
-            "jumping_to_conclusions",
-            "disqualifying_the_positive",
-            "personalization",
-        ],
-    },
-    "behavioral_experiment": {
-        "name": "Behavioral Experiment",
-        "description": "Testing beliefs through real-world experiences to gather evidence.",
-        "steps": [
-            "Identify a belief you want to test",
-            "Design an experiment to test this belief",
-            "Predict what will happen based on your current belief",
-            "Carry out the experiment and record what actually happens",
-            "Compare results with your prediction and adjust beliefs accordingly",
-        ],
-        "applicable_distortions": [
-            "all_or_nothing_thinking",
-            "overgeneralization",
-            "jumping_to_conclusions",
-        ],
-    },
-}
+from src.utils.state_utils import extract_conversation_history
 
 
-def identify_cognitive_distortions(input_data: str) -> str:
-    """
-    Identify potential cognitive distortions in a user's thinking patterns.
+# Model for cognitive distortion analysis output
+class DistortionAnalysis(BaseModel):
+    distortions: List[Dict[str, Any]] = Field(
+        description="List of identified cognitive distortions"
+    )
+    summary: str = Field(description="Summary of the overall thought patterns")
 
-    Args:
-        input_data: A JSON string containing conversation history or text to analyze
 
-    Returns:
-        A JSON string with identified cognitive distortions and examples
-    """
-    data = json.loads(input_data)
-    text_to_analyze = data.get("text", "") or data.get("conversation_history", [""])
-
-    if isinstance(text_to_analyze, list):
-        text_to_analyze = " ".join(text_to_analyze)
-
-    system_msg = SystemMessage(
-        content=f"""You are a CBT expert trained to identify cognitive distortions in people's thinking.
-        
-        Here's a list of common cognitive distortions defined in CBT:
-        {json.dumps(COGNITIVE_DISTORTIONS, indent=2)}
-        
-        Analyze the following text and identify any cognitive distortions present.
-        For each identified distortion:
-        1. Name the distortion
-        2. Quote the specific text that demonstrates this pattern
-        3. Explain why it fits this cognitive distortion
-        4. Rate the confidence of this identification (1-5)
-        
-        Be thoughtful and nuanced in your analysis. Only identify distortions if they are clearly present.
-        Return your response as JSON with an array of identified distortions.
-        """
+# Model for CBT technique recommendations
+class TechniqueRecommendation(BaseModel):
+    techniques: List[Dict[str, Any]] = Field(
+        description="List of recommended CBT techniques"
+    )
+    rationale: str = Field(
+        description="Explanation of why these techniques were chosen"
+    )
+    priority: List[str] = Field(
+        description="Ordered list of technique names by priority"
     )
 
-    human_msg = HumanMessage(content=text_to_analyze)
-    response = llm.invoke([system_msg, human_msg])
 
-    # Extract JSON from the response
-    try:
-        # Try to find a JSON block in the response
-        content = response.content
-        start_idx = content.find("{")
-        end_idx = content.rfind("}") + 1
-
-        if start_idx != -1 and end_idx != -1:
-            json_str = content[start_idx:end_idx]
-            distortions = json.loads(json_str)
-        else:
-            # If no JSON block, try to parse the whole response
-            distortions = json.loads(content)
-
-        return json.dumps(distortions)
-    except json.JSONDecodeError:
-        # Fallback if we can't parse JSON
-        return json.dumps(
-            {
-                "identified_distortions": [],
-                "error": "Could not identify clear cognitive distortions in the text",
-            }
-        )
+# Model for thought pattern analysis
+class ThoughtPatternAnalysis(BaseModel):
+    thought_patterns: List[Dict[str, Any]] = Field(
+        description="Identified thought patterns"
+    )
+    emotions: List[Dict[str, Any]] = Field(description="Associated emotions")
+    behaviors: List[Dict[str, Any]] = Field(description="Associated behaviors")
+    connections: List[Dict[str, Any]] = Field(
+        description="Connections between thoughts, emotions, and behaviors"
+    )
 
 
-def recommend_cbt_techniques(input_data: str) -> str:
+# CBT tool implementations
+def identify_cognitive_distortions(llm: BaseChatModel, text: str) -> Dict[str, Any]:
     """
-    Recommend CBT techniques based on identified cognitive distortions.
+    Identify cognitive distortions in the provided text using CBT principles.
+
+    This function uses a specialized prompt based on clinical CBT resources to
+    identify specific cognitive distortions present in the text.
 
     Args:
-        input_data: A JSON string containing identified cognitive distortions
+        llm: Language model to use for analysis
+        text: Text to analyze (typically conversation history)
 
     Returns:
-        A JSON string with recommended techniques and implementation steps
+        Dict: Analysis of cognitive distortions
     """
-    data = json.loads(input_data)
-    distortions = data.get("identified_distortions", [])
+    # Create a parser for structured output
+    parser = JsonOutputParser(pydantic_object=DistortionAnalysis)
 
-    # Map distortion types to technique recommendations
-    distortion_types = [d.get("type", "").lower() for d in distortions]
+    # Create a prompt with comprehensive cognitive distortion definitions
+    prompt = PromptTemplate.from_template(
+        """You are a CBT specialist trained to identify cognitive distortions in text.
+        
+        Here are the common cognitive distortions from CBT practice:
+        
+        1. All-or-Nothing Thinking: Seeing things in black and white categories. If your performance falls short of perfect, you see yourself as a total failure.
+           Example: "I made a mistake on that report, so I'm completely incompetent."
+        
+        2. Overgeneralization: Viewing a negative event as a never-ending pattern of defeat.
+           Example: "I got rejected for this job, I'll never find employment."
+        
+        3. Mental Filter: Picking out a single negative detail and dwelling on it exclusively.
+           Example: "I received mostly positive feedback, but my boss mentioned one small area for improvement, so I'm failing."
+        
+        4. Disqualifying the Positive: Rejecting positive experiences by insisting they "don't count."
+           Example: "People said they liked my presentation, but they were just being nice."
+        
+        5. Jumping to Conclusions: Making negative interpretations without definite facts. This includes:
+           - Mind Reading: Assuming you know what people are thinking
+           - Fortune Telling: Predicting things will turn out badly
+           Example: "They didn't smile at me, so they must hate me."
+        
+        6. Magnification or Minimization: Exaggerating the importance of problems and shortcomings, or minimizing strengths.
+           Example: "My mistake was catastrophic" or "My accomplishment wasn't a big deal."
+        
+        7. Emotional Reasoning: Assuming your negative emotions reflect reality.
+           Example: "I feel like a failure, so I must be one."
+        
+        8. Should Statements: Using "should," "must," or "ought" statements that set up unrealistic expectations.
+           Example: "I should never feel tired" or "I must always please everyone."
+        
+        9. Labeling: Attaching global labels to yourself or others instead of describing specific behaviors.
+           Example: "I'm a loser" instead of "I didn't do well in this situation."
+        
+        10. Personalization and Blame: Taking responsibility for events outside your control, or blaming others for your own actions.
+            Example: "It's my fault my friend is unhappy" or "I failed because my teacher didn't explain it well."
+            
+        Analyze the following text and identify any cognitive distortions present:
+        
+        {text}
+        
+        For each distortion you identify:
+        1. Specify the exact type of distortion
+        2. Quote the specific text showing this distortion
+        3. Explain why it qualifies as this type of distortion
+        4. Rate the severity (1-5, where 5 is most severe)
+        
+        Also provide an overall summary of the thought patterns.
+        
+        {format_instructions}
+        """
+    ).partial(format_instructions=parser.get_format_instructions())
 
-    system_msg = SystemMessage(
-        content=f"""You are a CBT expert who recommends appropriate techniques based on identified cognitive distortions.
+    # Process the text through the LLM
+    chain = prompt | llm | parser
+    result = chain.invoke({"text": text})
+
+    return result.dict()
+
+
+def recommend_cbt_techniques(
+    llm: BaseChatModel, text: str, distortions: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """
+    Recommend appropriate CBT techniques based on identified cognitive distortions.
+
+    This function matches effective CBT techniques to the specific cognitive distortions
+    identified in the conversation.
+
+    Args:
+        llm: Language model to use
+        text: Conversation text
+        distortions: List of identified cognitive distortions
+
+    Returns:
+        Dict: Recommended techniques and rationale
+    """
+    # Create a parser for structured output
+    parser = JsonOutputParser(pydantic_object=TechniqueRecommendation)
+
+    # Format the distortions for inclusion in the prompt
+    distortions_json = json.dumps(distortions, indent=2)
+
+    # Create a prompt with CBT technique descriptions
+    prompt = PromptTemplate.from_template(
+        """You are a CBT specialist recommending appropriate techniques based on identified cognitive distortions.
         
-        Here are common CBT techniques and their applications:
-        {json.dumps(CBT_TECHNIQUES, indent=2)}
+        Here are effective CBT techniques:
         
-        Based on the identified cognitive distortions, recommend suitable CBT techniques.
-        For each recommendation:
+        1. Thought Records: Systematically examining and challenging negative thoughts.
+           Steps: Identify situation, identify automatic thought, identify emotions, identify evidence for and against thought, develop balanced alternative thought, rate new emotion.
+           
+        2. Behavioral Activation: Increasing engagement in activities that provide positive reinforcement.
+           Steps: Identify valued activities, schedule activities, monitor mood before and after, gradually increase difficulty.
+           
+        3. Exposure Therapy: Gradually facing feared situations to reduce anxiety.
+           Steps: Create anxiety hierarchy, begin with least anxiety-provoking situation, practice until anxiety decreases, move to next item.
+           
+        4. Cognitive Restructuring: Identifying and modifying unhelpful thoughts and beliefs.
+           Steps: Identify automatic thoughts, evaluate evidence, generate alternative explanations, practice realistic thinking.
+           
+        5. Behavioral Experiments: Testing beliefs through real-world experiments.
+           Steps: Identify belief to test, design experiment, predict outcome, conduct experiment, evaluate results.
+           
+        6. Problem-Solving: Systematic approach to addressing practical problems.
+           Steps: Define problem, generate solutions, evaluate options, implement solution, review outcome.
+           
+        7. Mindfulness: Developing non-judgmental awareness of present moment experiences.
+           Steps: Practice focused attention, observe thoughts without judgment, return to present when mind wanders.
+           
+        8. Relaxation Training: Techniques to reduce physical tension.
+           Steps: Progressive muscle relaxation, deep breathing, visualization, body scan.
+           
+        9. Self-Monitoring: Tracking thoughts, emotions, behaviors to identify patterns.
+           Steps: Record situation, thoughts, emotions, behaviors, identify triggers and patterns.
+           
+        10. Activity Scheduling: Planning activities to improve mood and build mastery.
+            Steps: Schedule activities, rate expected pleasure/mastery, complete activities, rate actual pleasure/mastery.
+            
+        11. Socratic Questioning: Using questions to examine evidence and logic behind thoughts.
+            Steps: What evidence supports this thought? Is there evidence against it? Are there alternative explanations?
+            
+        12. The ABCD Method: Analyzing Activating events, Beliefs, Consequences, and Disputing unhelpful beliefs.
+            Steps: Identify triggering event, identify belief about event, identify consequences, dispute irrational beliefs.
+            
+        The user has shared the following conversation:
+        
+        {text}
+        
+        These cognitive distortions have been identified:
+        
+        {distortions}
+        
+        Based on this information, recommend appropriate CBT techniques.
+        For each technique:
         1. Name the technique
-        2. Explain why it's appropriate for the identified distortions
-        3. Provide clear, actionable steps for implementing the technique
-        4. Give a specific example of how to apply it to the user's situation
+        2. Explain why it's appropriate for this situation
+        3. Provide specific steps tailored to the user's situation
+        4. Suggest how to introduce it to the user
         
-        Return your response as JSON with an array of recommended techniques.
+        Order the techniques by priority for this situation.
+        
+        {format_instructions}
         """
-    )
+    ).partial(format_instructions=parser.get_format_instructions())
 
-    human_msg = HumanMessage(
-        content=json.dumps(
-            {
-                "identified_distortions": distortions,
-                "distortion_types": distortion_types,
-            }
-        )
-    )
+    # Process through the LLM
+    chain = prompt | llm | parser
+    result = chain.invoke({"text": text, "distortions": distortions_json})
 
-    response = llm.invoke([system_msg, human_msg])
-
-    # Extract JSON from the response
-    try:
-        # Try to find a JSON block in the response
-        content = response.content
-        start_idx = content.find("{")
-        end_idx = content.rfind("}") + 1
-
-        if start_idx != -1 and end_idx != -1:
-            json_str = content[start_idx:end_idx]
-            recommendations = json.loads(json_str)
-        else:
-            # If no JSON block, try to parse the whole response
-            recommendations = json.loads(content)
-
-        return json.dumps(recommendations)
-    except json.JSONDecodeError:
-        # Fallback for general CBT techniques
-        return json.dumps(
-            {
-                "recommended_techniques": [
-                    {
-                        "name": "Thought Record",
-                        "description": CBT_TECHNIQUES["thought_record"]["description"],
-                        "steps": CBT_TECHNIQUES["thought_record"]["steps"],
-                    },
-                    {
-                        "name": "Cognitive Restructuring",
-                        "description": CBT_TECHNIQUES["cognitive_restructuring"][
-                            "description"
-                        ],
-                        "steps": CBT_TECHNIQUES["cognitive_restructuring"]["steps"],
-                    },
-                ],
-                "note": "These are general CBT techniques that can be helpful in most situations.",
-            }
-        )
+    return result.dict()
 
 
-def analyze_thought_patterns(input_data: str) -> str:
+def analyze_thought_patterns(llm: BaseChatModel, text: str) -> Dict[str, Any]:
     """
-    Analyze general thought patterns in a conversation for CBT-relevant themes.
+    Analyze thought patterns and their connection to emotions and behaviors.
+
+    This function examines the cognitive-behavioral connections in the user's
+    conversation, identifying core thought patterns and their impact.
 
     Args:
-        input_data: A JSON string containing conversation history
+        llm: Language model to use
+        text: Conversation text to analyze
 
     Returns:
-        A JSON string with analyzed themes and patterns
+        Dict: Analysis of thought patterns, emotions, behaviors, and their connections
     """
-    data = json.loads(input_data)
-    conversation_history = data.get("conversation_history", [])
+    # Create a parser for structured output
+    parser = JsonOutputParser(pydantic_object=ThoughtPatternAnalysis)
 
-    if not conversation_history:
-        return json.dumps(
-            {"themes": [], "patterns": [], "error": "No conversation history provided"}
-        )
-
-    # Join conversation messages
-    if isinstance(conversation_history, list):
-        conversation_text = " ".join(conversation_history)
-    else:
-        conversation_text = conversation_history
-
-    system_msg = SystemMessage(
-        content="""You are a CBT expert analyzing conversation patterns for CBT-relevant themes.
+    # Create a prompt for thought pattern analysis
+    prompt = PromptTemplate.from_template(
+        """You are a CBT specialist analyzing the connections between thoughts, emotions, and behaviors.
         
-        Look for the following in the conversation:
-        1. Recurring emotional themes (anxiety, depression, frustration, etc.)
-        2. Situations that trigger negative emotions
-        3. Beliefs about self, others, and the world
-        4. Behavioral patterns mentioned
-        5. Goals or values expressed
-        6. Strengths and resources the person has
+        In CBT, we understand that:
+        - Thoughts influence emotions and behaviors
+        - Emotions influence thoughts and behaviors
+        - Behaviors influence thoughts and emotions
         
-        Provide a thoughtful analysis that captures the core patterns without making assumptions.
-        Return your analysis as JSON with clear, organized sections.
+        Analyze the following conversation to identify:
+        
+        {text}
+        
+        In your analysis:
+        1. Identify recurring thought patterns (what the person believes about themselves, others, and their situation)
+        2. Identify emotional responses and their intensity
+        3. Identify behavioral patterns (what the person does or avoids doing)
+        4. Analyze how these elements connect and reinforce each other
+        
+        Be specific and reference exact examples from the text.
+        
+        {format_instructions}
+        """
+    ).partial(format_instructions=parser.get_format_instructions())
+
+    # Process through the LLM
+    chain = prompt | llm | parser
+    result = chain.invoke({"text": text})
+
+    return result.dict()
+
+
+def create_homework_assignment(
+    llm: BaseChatModel, text: str, techniques: List[Dict[str, Any]]
+) -> str:
+    """
+    Create a personalized homework assignment based on recommended techniques.
+
+    This function develops appropriate practice exercises for the user to
+    implement between sessions, based on their specific situation.
+
+    Args:
+        llm: Language model to use
+        text: Conversation text
+        techniques: List of recommended techniques
+
+    Returns:
+        str: Personalized homework assignment
+    """
+    # Format the techniques for inclusion in the prompt
+    techniques_json = json.dumps(techniques, indent=2)
+
+    # Create a prompt for homework assignment creation
+    prompt = PromptTemplate.from_template(
+        """You are a CBT specialist creating a personalized homework assignment.
+        
+        The user has shared the following conversation:
+        
+        {text}
+        
+        You've recommended these techniques:
+        
+        {techniques}
+        
+        Create a specific, achievable homework assignment that:
+        1. Focuses on one or two priority techniques
+        2. Gives clear instructions that the user can follow independently
+        3. Is appropriate for a beginner to CBT
+        4. Can be completed within the next week
+        5. Will provide a foundation for further work
+        
+        Format your response as a direct message to the user, explaining:
+        - What you're asking them to do
+        - Why this assignment will help
+        - How to record their progress
+        - What to pay attention to while doing the assignment
+        
+        Keep the tone supportive and collaborative.
         """
     )
 
-    human_msg = HumanMessage(content=conversation_text)
-    response = llm.invoke([system_msg, human_msg])
+    # Process through the LLM
+    result = llm.invoke(prompt.format(text=text, techniques=techniques_json))
 
-    # Extract JSON from the response
-    try:
-        # Try to find a JSON block in the response
-        content = response.content
-        start_idx = content.find("{")
-        end_idx = content.rfind("}") + 1
-
-        if start_idx != -1 and end_idx != -1:
-            json_str = content[start_idx:end_idx]
-            analysis = json.loads(json_str)
-        else:
-            # If no JSON block, try to parse the whole response
-            analysis = json.loads(content)
-
-        return json.dumps(analysis)
-    except json.JSONDecodeError:
-        # Create a structured fallback response
-        return json.dumps(
-            {
-                "themes": ["Unable to identify specific themes"],
-                "patterns": ["Analysis requires more conversation context"],
-                "next_steps": "Continue the conversation to gather more information",
-            }
-        )
+    return result.content

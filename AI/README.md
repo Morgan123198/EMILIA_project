@@ -1,176 +1,104 @@
-# Emilia - AI Component
+# CBT Bot
 
-Emilia is an AI-based virtual assistant designed to improve the emotional wellbeing of university students through personalized emotional support, stress management, and academic life balance assistance.
+A cognitive behavioral therapy (CBT) assistant built with LangGraph and LangChain.
 
-## AI System Overview
+## Overview
 
-The AI component of Emilia combines natural language processing and emotional diagnostic techniques, incorporating clinical evaluation tools and cognitive-behavioral therapy approaches. The system provides personalized recommendations and tools like mindfulness exercises and guided videos.
+The CBT Bot is an AI-powered assistant that uses cognitive behavioral therapy techniques to help users identify and challenge negative thought patterns. The bot consists of two main components:
 
-## Key AI Capabilities
+1. A listener agent that engages users in conversation and identifies when CBT intervention might be helpful
+2. A CBT intervention agent that applies specific therapeutic techniques to help users reframe their thoughts
 
-- Empathetic and contextually-aware conversation
-- Emotional state monitoring and tracking
-- Personalized advice based on academic context
-- Crisis detection and appropriate response generation
-- Specialized agent routing based on user needs
+## Features
 
-## Technical Architecture
+- Two-phase conversation model (listening and CBT intervention)
+- Automatic detection of cognitive distortions
+- Recommendation of appropriate CBT techniques
+- Support for conversations in multiple languages
+- Saves and loads conversation history
+- Powered by Google's Gemini 2.0 through OpenRouter
 
-### AI System Components
-- Router Agent for central orchestration
-- Memory Manager for conversation state
-- Specialized Agents:
-  - Emotional Support
-  - Academic Planning
-  - Crisis Management
-- LLM Core for natural language processing
-
-## AI Development Phases
-
-### Phase 1: Core NLP Implementation
-- [ ] Set up base LLM integration
-  - Implement API connection to chosen LLM (e.g., LLaMA 2)
-  - Configure model parameters and response formatting
-  - Implement prompt engineering templates
-- [ ] Develop conversation management
-  - Create conversation state handlers
-  - Implement context retention mechanisms
-  - Design conversation flow controllers
-
-### Phase 2: Specialized Agents Development
-- [ ] Emotional Support Agent
-  - Implement sentiment analysis
-  - Develop emotional state tracking
-  - Create response templates for different emotional states
-  - Integrate CBT techniques and mindfulness exercises
-  - Implement content recommendation system
-
-- [ ] Academic Planning Agent
-  - Develop task organization algorithms
-  - Implement study schedule optimization
-  - Create stress management recommendations
-  - Integrate time management content
-
-- [ ] Crisis Management Agent
-  - Implement emergency response protocols
-  - Create escalation mechanisms
-  - Develop safety check systems
-  - Integrate emergency resources
-
-### Phase 3: Content Management System
-- [ ] Resource Database
-  - Structure content categories
-  - Implement content metadata
-  - Create content update pipeline
-
-- [ ] Recommendation Engine
-  - Design recommendation algorithms
-  - Implement content matching system
-  - Create engagement tracking
-
-### Phase 4: Memory and State Management
-- [ ] Implement Memory Manager
-  - Design conversation history storage
-  - Create retrieval mechanisms
-  - Implement context summarization
-- [ ] Develop State Tracking
-  - Create user state models
-  - Implement progress tracking
-  - Develop analytics systems
-
-### Phase 5: Integration and Optimization
-- [ ] Router Agent Implementation
-  - Create agent coordination system
-  - Implement request routing logic
-  - Develop agent communication protocols
-- [ ] System Optimization
-  - Implement response caching
-  - Optimize model performance
-  - Reduce latency in agent switching
-
-## Directory Structure
-```
-AI/
-├── data/               # Training data and resources
-├── src/                # Source code for AI implementation
-│   ├── agents/         # Agent implementation modules
-│   ├── core/           # Core NLP and routing systems
-│   ├── tools/          # Tools for agents
-│   ├── analysis/       # Analysis utilities
-│   ├── api/            # API endpoints
-│   ├── models/         # Data models
-│   └── prompts/        # Prompt templates
-├── prompts/            # High-level prompt designs
-└── utils/              # Utility functions and helpers
-```
-
-## LangGraph Implementation
-
-The AI system is built using LangGraph for orchestrating the different agents and managing conversation state. Key components include:
-
-1. **State Management**
-   - Conversation history tracking
-   - Emotional state monitoring
-   - Context preservation
-   - Memory management
-
-2. **Specialized Agents**
-   - Mental Health Specialist
-   - Therapist Agents
-   - Emergency Medical Support
-   - General Medical Support
-
-3. **Router System**
-   - Message analysis
-   - Agent selection
-   - Crisis detection
-   - Context-aware routing
-
-4. **Memory System**
-   - Conversation history
-   - Emotional state tracking
-   - Interaction timestamps
-   - Context preservation
-
-## Dependencies
+## Prerequisites
 
 - Python 3.8+
-- LangChain
-- LangGraph
-- OpenAI API or compatible LLM API
-- Redis (for caching)
+- Poetry (for dependency management)
+- OpenRouter API key
 
-## Setup Instructions
+## Installation
 
-1. Install Poetry (if you don't have it already):
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
+1. Clone the repository
+2. Install dependencies with Poetry:
+   ```
+   poetry install
+   ```
+3. Set up your OpenRouter API key:
+   ```
+   export OPENROUTER_API_KEY=your_key_here
+   ```
+4. Alternatively, create a `.env` file in the project root with:
+   ```
+   OPENROUTER_API_KEY=your_key_here
+   ```
+
+## Usage
+
+### Starting the CBT Bot
+
+The easiest way to start the bot is using the provided shell script:
+
+```
+./start_cbt_bot.sh
 ```
 
-2. Install dependencies:
-```bash
-poetry install
+This will start both the LangGraph server and the interactive client.
+
+### Running Components Separately
+
+To run the server:
+
+```
+poetry run python run_cbt_server.py --port 2024
 ```
 
-3. Configure environment variables:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
+To run the interactive client:
+
+```
+poetry run python cbt_client.py --server http://localhost:2024 --graph cbt_bot
 ```
 
-4. Run the chatbot:
-```bash
+### Testing with JSON Conversations
+
+You can test the bot with pre-defined conversations stored in JSON format:
+
+```
+poetry run python cbt_bot_json_test.py --conversation test_conversations/bullying_scenario.json
+```
+
+### Using LangGraph CLI Directly
+
+You can also use the LangGraph CLI to start the server:
+
+```
 poetry run langgraph dev
 ```
 
-## Security Features
+## Model Configuration
 
-- End-to-end encryption
-- Data anonymization
-- Secure storage protocols
-- Informed consent mechanisms
+The bot uses Google's Gemini 2.0 through OpenRouter by default, as it provides excellent tool usage capabilities and conversational flow. You can modify the model by changing the `LLM_MODEL` setting in `.env` or the environment variables.
 
-## Contact
+## Project Structure
 
-For more information about the AI component of the project, contact:
-- apachecotaboada@gmail.com 
+- `src/agents/` - Contains the listener and CBT intervention agent implementations
+- `src/core/` - Core functionality including the CBT graph and routing logic
+- `src/prompts/` - Prompt templates for the language models
+- `src/schema/` - Type definitions and data structures
+- `src/tools/` - Tools for CBT analysis and technique recommendation
+- `src/utils/` - Utility functions for state management and conversation parsing
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 
