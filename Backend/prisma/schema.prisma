@@ -13,9 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
   password String
   token    String?
+
+  // Relación con los mensajes (un usuario puede escribir muchos mensajes)
+  messages Message[]
 }
+
+model Message {
+  id        Int       @id @default(autoincrement())
+  message   String
+  createdAt DateTime  @default(now())
+
+  // Relación con el usuario
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relación con el mensaje padre
+  parentId  Int?
+  parent    Message?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+
+  // Relación con las respuestas (hijos)
+  replies   Message[] @relation("MessageReplies")
+}
+
+
